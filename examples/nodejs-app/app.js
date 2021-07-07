@@ -2,6 +2,16 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 
+const { createHistogram, performance, PerformanceObserver } = require("perf_hooks")
+
+const perfObserver = new PerformanceObserver((items) => {
+  items.getEntries().forEach((entry) => {
+    console.log(entry)
+  })
+})
+
+perfObserver.observe({ entryTypes: ["measure"], buffer: true });
+
 const fs = require('fs');
 const { loadPolicy } = require("@open-policy-agent/opa-wasm");
 
@@ -16,11 +26,20 @@ loadPolicy(policyWasm).then(policy => {
     // will raise an error
     const input = JSON.parse(process.argv[2]);
     // Provide a data document with a string value
-    policy.setData({world: "world"});
+    // policy.setData({world: "world"});
 
     // Evaluate the policy and log the result
-    const result = policy.evaluate(input);
-    console.log(JSON.stringify(result, null, 2))
+    //performance.mark("example-start")
+    hist = createHistogram();
+    result = [];
+    for (let i = 0; i < 1000; i++) {
+        result = policy.evaluate(input);
+        hist.recordDelta();
+    }
+    //performance.mark("example-end")
+    //performance.measure("example", "example-start", "example-end")
+    console.log(hist.percentiles);
+    console.log(JSON.stringify(result, null, 2));
 
 }).catch(err => {
     console.log("ERROR: ", err);
