@@ -26,8 +26,17 @@ jobs:
         opa-version:
         - 0.30.2 # last version with ABI 1.1, 0.31.0+ has ABI 1.2
         - 0.35.0 # first release with https://github.com/open-policy-agent/opa/pull/4055
+        - latest
+        - edge
 
     steps:
+    - name: Install Open Policy Agent ${{ matrix.opa-version }}
+      uses: srenatus/setup-opa@v1
+      with:
+        version: ${{ matrix.opa-version }}
+
+    - run: opa version
+
     - uses: actions/checkout@v2
 
     - name: Checkout OPA v${{ matrix.opa-version }}
